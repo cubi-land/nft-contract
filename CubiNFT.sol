@@ -2,61 +2,29 @@
 
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
+import "contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "contracts/access/Ownable.sol";
 
-contract CubiNFT is ERC721Enumerable, AccessControlEnumerable {
+contract TheStripesNFT is ERC721Enumerable, Ownable {
     using Strings for uint256;
 
     string public baseURI;
     string public baseExtension = ".json";
     uint256 public cost = 0.05 ether;
     uint256 public presaleCost = 0.03 ether;
-    uint256 public maxSupply = 1000;
+    uint256 public maxSupply = 992;
     uint256 public maxMintAmount = 20;
     bool public paused = false;
     mapping(address => bool) public whitelisted;
     mapping(address => bool) public presaleWallets;
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     constructor(
         string memory _name,
         string memory _symbol,
-        string memory _initBaseURI,
-        string memory _maxSupply
+        string memory _initBaseURI
     ) ERC721(_name, _symbol) {
         setBaseURI(_initBaseURI);
-        maxSupply = _maxSupply;
-        //mint(msg.sender, 20);
-    }
-
-    modifier onlyAdmin 
-    {
-        require(hasRole(ADMIN_ROLE, msg.sender), "Caller is not a admin");
-        _;
-    }
-
-    modifier onlyDefaultAdmin 
-    {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller is not a default admin");
-        _;
-    }
-
-    function grantAdmin(address admin) 
-        external onlyDefaultAdmin 
-    {
-        grantRole(MINTER_ROLE, admin);
-    }
-
-    function revokeAdmin(address admin) 
-        external onlyDefaultAdmin 
-    {
-        revokeRole(MINTER_ROLE, admin);
-    }
-
-    function isAdmin() public {
-        require(hasRole(ADMIN_ROLE, msg.sender));
-        return true;
+        mint(msg.sender, 20);
     }
 
     // internal
@@ -72,7 +40,7 @@ contract CubiNFT is ERC721Enumerable, AccessControlEnumerable {
         require(_mintAmount <= maxMintAmount);
         require(supply + _mintAmount <= maxSupply);
 
-        if (isAdmin()) {
+        if (msg.sender != owner()) {
             if (whitelisted[msg.sender] != true) {
                 if (presaleWallets[msg.sender] != true) {
                     //general public
@@ -128,56 +96,56 @@ contract CubiNFT is ERC721Enumerable, AccessControlEnumerable {
     }
 
     //only owner
-    function setCost(uint256 _newCost) public onlyAdmin {
+    function setCost(uint256 _newCost) public onlyOwner {
         cost = _newCost;
     }
 
-    function setPresaleCost(uint256 _newCost) public onlyAdmin {
+    function setPresaleCost(uint256 _newCost) public onlyOwner {
         presaleCost = _newCost;
     }
 
-    function setmaxMintAmount(uint256 _newmaxMintAmount) public onlyAdmin {
+    function setmaxMintAmount(uint256 _newmaxMintAmount) public onlyOwner {
         maxMintAmount = _newmaxMintAmount;
     }
 
-    function setBaseURI(string memory _newBaseURI) public onlyAdmin {
+    function setBaseURI(string memory _newBaseURI) public onlyOwner {
         baseURI = _newBaseURI;
     }
 
     function setBaseExtension(string memory _newBaseExtension)
         public
-        onlyAdmin
+        onlyOwner
     {
         baseExtension = _newBaseExtension;
     }
 
-    function pause(bool _state) public onlyAdmin {
+    function pause(bool _state) public onlyOwner {
         paused = _state;
     }
 
-    function whitelistUser(address _user) public onlyAdmin {
+    function whitelistUser(address _user) public onlyOwner {
         whitelisted[_user] = true;
     }
 
-    function removeWhitelistUser(address _user) public onlyAdmin {
+    function removeWhitelistUser(address _user) public onlyOwner {
         whitelisted[_user] = false;
     }
 
-    function addPresaleUser(address _user) public onlyAdmin {
+    function addPresaleUser(address _user) public onlyOwner {
         presaleWallets[_user] = true;
     }
 
-    function add100PresaleUsers(address[100] memory _users) public onlyAdmin {
+    function add100PresaleUsers(address[100] memory _users) public onlyOwner {
         for (uint256 i = 0; i < 2; i++) {
             presaleWallets[_users[i]] = true;
         }
     }
 
-    function removePresaleUser(address _user) public onlyAdmin {
+    function removePresaleUser(address _user) public onlyOwner {
         presaleWallets[_user] = false;
     }
 
-    function withdraw() public payable onlyAdmin {
+    function withdraw() public payable onlyOwner {
         (bool success, ) = payable(msg.sender).call{
             value: address(this).balance
         }("");
