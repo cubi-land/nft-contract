@@ -12,7 +12,7 @@ contract CubiNFT is ERC721Enumerable, AccessControlEnumerable {
     string public baseExtension = ".json";
     uint256 public cost = 0.05 ether;
     uint256 public presaleCost = 0.03 ether;
-    uint256 public maxSupply = 992;
+    uint256 public maxSupply = 1000;
     uint256 public maxMintAmount = 20;
     bool public paused = false;
     mapping(address => bool) public whitelisted;
@@ -128,56 +128,56 @@ contract CubiNFT is ERC721Enumerable, AccessControlEnumerable {
     }
 
     //only owner
-    function setCost(uint256 _newCost) public onlyOwner {
+    function setCost(uint256 _newCost) public onlyAdmin {
         cost = _newCost;
     }
 
-    function setPresaleCost(uint256 _newCost) public onlyOwner {
+    function setPresaleCost(uint256 _newCost) public onlyAdmin {
         presaleCost = _newCost;
     }
 
-    function setmaxMintAmount(uint256 _newmaxMintAmount) public onlyOwner {
+    function setmaxMintAmount(uint256 _newmaxMintAmount) public onlyAdmin {
         maxMintAmount = _newmaxMintAmount;
     }
 
-    function setBaseURI(string memory _newBaseURI) public onlyOwner {
+    function setBaseURI(string memory _newBaseURI) public onlyAdmin {
         baseURI = _newBaseURI;
     }
 
     function setBaseExtension(string memory _newBaseExtension)
         public
-        onlyOwner
+        onlyAdmin
     {
         baseExtension = _newBaseExtension;
     }
 
-    function pause(bool _state) public onlyOwner {
+    function pause(bool _state) public onlyAdmin {
         paused = _state;
     }
 
-    function whitelistUser(address _user) public onlyOwner {
+    function whitelistUser(address _user) public onlyAdmin {
         whitelisted[_user] = true;
     }
 
-    function removeWhitelistUser(address _user) public onlyOwner {
+    function removeWhitelistUser(address _user) public onlyAdmin {
         whitelisted[_user] = false;
     }
 
-    function addPresaleUser(address _user) public onlyOwner {
+    function addPresaleUser(address _user) public onlyAdmin {
         presaleWallets[_user] = true;
     }
 
-    function add100PresaleUsers(address[100] memory _users) public onlyOwner {
+    function add100PresaleUsers(address[100] memory _users) public onlyAdmin {
         for (uint256 i = 0; i < 2; i++) {
             presaleWallets[_users[i]] = true;
         }
     }
 
-    function removePresaleUser(address _user) public onlyOwner {
+    function removePresaleUser(address _user) public onlyAdmin {
         presaleWallets[_user] = false;
     }
 
-    function withdraw() public payable onlyOwner {
+    function withdraw() public payable onlyAdmin {
         (bool success, ) = payable(msg.sender).call{
             value: address(this).balance
         }("");
